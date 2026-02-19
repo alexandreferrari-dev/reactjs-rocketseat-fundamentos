@@ -2,12 +2,13 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+   
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Rubik&display=swap" rel="stylesheet" />
     <title>RocketSeat - React.js - Fundamentos</title>
-    <style type ="text/tailwindcss">
+    <style type="text/tailwindcss">
       @theme {
         --text:#EBEBEB;
         --text-secondary: #6B6B6B;
@@ -32,10 +33,10 @@
       }
       
     </style>
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
   </head>
   <body class="min-h-screen bg-linear-[180deg,_#807ECE 0%,_#8E7ECE_100%] text-(--text) font-(--font-sans)">
     <div id="root"></div>
-    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -148,14 +149,14 @@
             <Text 
             as="div" 
             variant="muted"
-            className="flex item-center justify-end">
-              {operation}
+            className="flex item-center justify-end h-7">
+              {result && operation}
             </Text>
               <div className={`
-                flex items-center justify-between
+                flex items-center justify-between h-9
                 `}>
                 <Text variant="muted">=</Text>
-                <Text variant="blast">{result}</Text>
+                <Text variant="blast">{result || operation}</Text>
               </div>
             </div>
         )
@@ -163,8 +164,26 @@
       }
 
       function Calculator() {
+        const [operation, setOperation] = React.useState('');
+        const [result, setResult] = React.useState('');
+
         function handleInputClick(input) {
-        console.log(input);
+          if (input === "="){
+            const operationResult = eval(operation.replace(/,/g, '.'));
+            const rounded = parseFloat(operationResult.toPrecision(10));
+            const parsedResult = rounded.toString().replace(/\./g, ',');
+            setResult(parsedResult);
+            return;
+          }
+
+          if (input === "," && !operation.endsWith(',')){
+            setOperation(`${operation},`);
+            return;
+          }
+
+          setOperation(
+             `${operation}${operation.endsWith(',') ? "" : " "}${input}`
+          );
         }
         return (
           <Card className={`
@@ -172,7 +191,10 @@
             pt-14 px-8 pb-8
             `}
             >
-            <CalculatorDisplay operation="1 + 1" result="2" />
+            <CalculatorDisplay 
+            operation={operation} 
+            result={result} 
+            />
 
             <div className="flex flex-col gap-3">
               {buttons.map((row, index) => (
@@ -230,7 +252,7 @@
             </main>
           )
       }
-      ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+      ReactDOM.createRoot(document.getElementById('root')).render(<App />)
     </script>
   </body>
 </html>
