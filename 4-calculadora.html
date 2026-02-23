@@ -168,12 +168,32 @@
         const [result, setResult] = React.useState('');
 
         function handleInputClick(input) {
+          if (input === "C"){
+            setOperation("");
+            setResult("");
+            return;
+          }
+
+          if (input === "CE"){
+            setResult("");
+            setOperation(operation.slice(0, -2));
+            return;
+          }
+
           if (input === "="){
             const operationResult = eval(operation.replace(/,/g, '.'));
             const rounded = parseFloat(operationResult.toPrecision(10));
             const parsedResult = rounded.toString().replace(/\./g, ',');
             setResult(parsedResult);
             return;
+          }
+
+          if (result){
+            setOperation(isNaN(input)
+             ? `${result}${input === "," ? "" : " "}${input}`
+             : input)
+             setResult("");
+             return;
           }
 
           if (input === "," && !operation.endsWith(',')){
