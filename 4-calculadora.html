@@ -140,6 +140,23 @@
         ]
       ]
 
+      const CalculatorContext = React.createContext();//criei o contexto do histórico aqui
+      function CalculatorProvider ({ children }){// cria a função provedor
+          const [history, setHistory] = React.useState([]);//cria o estado (valor ini, função)
+
+          function updateHistory (operations, parsedResult){//função que vai fazer o update para o histórico
+            setHistory((prev) => [...prev, `${operations}=${parsedResult}`])//concatenando as operações e resultados com o spread (espalhando os dados do array)
+          }
+        return (//retorna o nativo value com os dados que vamos compartilhar encapsulados
+          <CalculatorContext.Provider
+          value={{history, updateHistory}}
+          >
+          { children }
+          </CalculatorContext.Provider>
+
+        )//levando sempre a children pra renderizar onde quisermos
+      }
+
       function CalculatorDisplay({ operation, result }) {
         return (
           <div className={`
@@ -166,6 +183,7 @@
       function Calculator() {
         const [operation, setOperation] = React.useState('');
         const [result, setResult] = React.useState('');
+        const { updateHistory } = React.useContext(CalculatorContext);
 
         function handleInputClick(input) {
           if (input === "C"){
@@ -185,6 +203,7 @@
             const rounded = parseFloat(operationResult.toPrecision(10));
             const parsedResult = rounded.toString().replace(/\./g, ',');
             setResult(parsedResult);
+            updateHistory(operation, parsedResult);//aqui vem a função que já está salvando com o spread
             return;
           }
 
@@ -248,6 +267,7 @@ if (operators.includes(input) && operators.includes(operation.slice(-1))) {
       }
 
       function OperationHistory(){
+        const { history } = React.useContext(CalculatorContext);
         return (
           <Card className="w-full py-10 px-8">
             <Text 
@@ -257,11 +277,19 @@ if (operators.includes(input) && operators.includes(operation.slice(-1))) {
             >
             Histórico de Operações
             </Text>
+
+            {history.length > 0 ?
+              (
               <ul className="flex flex-col gap-3">
-              <Text as="li">1 + 1 = 2</Text>
-              <Text as="li">2 + 3 +1 = 6</Text>
-              <Text as="li">2 + 3 = 5</Text>
+                {history.map((value, index) => <Text key={`item-${index}`} as="li">
+                  {value}  
+            </Text>)}
+              
               </ul>
+            ) : (
+              <Text as="p" variant="muted">Nenhuma operação recente.</Text>
+            )
+            }
           </Card>
         )
       }
@@ -274,8 +302,10 @@ if (operators.includes(input) && operators.includes(operation.slice(-1))) {
               items-center sm:items-stretch
               gap-2
               `}>
+              <CalculatorProvider>
               <Calculator />
               <OperationHistory />
+              </CalculatorProvider>
             </main>
           )
       }
