@@ -143,9 +143,27 @@
       const CalculatorContext = React.createContext();//criei o contexto do histórico aqui
       function CalculatorProvider ({ children }){// cria a função provedor
           const [history, setHistory] = React.useState([]);//cria o estado (valor ini, função)
+          const historyStorageKey = 'history';
+
+          React.useEffect(() => {
+            const savedHistory = localStorage.getItem(historyStorageKey);
+            setHistory(JSON.parse(savedHistory || '[]'));
+          }, [])
 
           function updateHistory (operations, parsedResult){//função que vai fazer o update para o histórico
-            setHistory((prev) => [...prev, `${operations}=${parsedResult}`])//concatenando as operações e resultados com o spread (espalhando os dados do array)
+            setHistory((prev) => {
+              const updatedHistory = [
+                ...prev, 
+                `${operations}=${parsedResult}`//concatenando as operações e resultados com o spread (espalhando os dados do array)
+              ];
+            localStorage.setItem(
+              historyStorageKey,
+              JSON.stringify(updatedHistory)
+            )
+             
+              return updatedHistory;
+
+          })
           }
         return (//retorna o nativo value com os dados que vamos compartilhar encapsulados
           <CalculatorContext.Provider
